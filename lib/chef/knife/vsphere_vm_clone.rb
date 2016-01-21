@@ -449,6 +449,10 @@ class Chef::Knife::VsphereVmClone < Chef::Knife::BaseVsphereCommand
       rspec = RbVmomi::VIM.VirtualMachineRelocateSpec(diskMoveType: :moveChildMostDiskBacking)
     end
 
+    if get_config(:thin_provision)
+      rspec = RbVmomi::VIM.VirtualMachineRelocateSpec(transform: :sparse, pool: find_pool(get_config(:resource_pool)))
+    end
+
     if get_config(:datastore) && get_config(:datastorecluster)
       abort 'Please select either datastore or datastorecluster'
     end
@@ -465,10 +469,6 @@ class Chef::Knife::VsphereVmClone < Chef::Knife::BaseVsphereCommand
           rspec.datastore = store
         end
       end
-    end
-
-    if get_config(:thin_provision)
-      rspec = RbVmomi::VIM.VirtualMachineRelocateSpec(transform: :sparse, pool: find_pool(get_config(:resource_pool)))
     end
 
     is_template = !get_config(:mark_as_template).nil?
